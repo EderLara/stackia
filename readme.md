@@ -31,9 +31,22 @@ Asegúrate de tener instalados los siguientes programas en tu sistema:
    cd stackia
    ```
 2. Levanta los contenedores con Docker Compose:
-```
-docker-compose up -d --build
-```
+    ```
+    docker-compose up -d --build
+    ```
+3. Ingresa a la terminal del contenedor web:
+    ```
+    docker exec -it web bash
+    ```
+4. Aplica las migraciones de Django:
+    ```
+    python manage.py makemigrations
+    python manage.py migrate
+    ```
+5. Reinicia el contenedor ```web``` para aplicar los cambios:
+    ```
+    docker restart web
+    ```
 
 ### Uso
 * Accede a la interfaz web desde tu navegador en http://localhost:8000.
