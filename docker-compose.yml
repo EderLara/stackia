@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_USER: useria
+      POSTGRES_PASSWORD: ia2025
+      POSTGRES_DB: dbappia
+    ports:
+      - "5432:5432"       # Solo para desarrollo, remover en producción
+    networks:
+      - app-network
+    container_name: dbia  # Añadimos un nombre de contenedor para mayor claridad
+
+  model_app:
+    build:
+      context: ./apimodel
+      dockerfile: Dockerfile.model
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/api_model
+    networks:
+      - app-network
+    container_name: apiia
+
+  web_app:
+    build:
+      context: .\reconocimiento_digital
+      dockerfile: Dockerfile.django
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app_web
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_USER: useria
+      POSTGRES_PASSWORD: ia2025
+      POSTGRES_DB: dbappia
+      DB_HOST: db # Usamos el nombre del servicio 'db'
+      DB_PORT: 5432
+      MODEL_API_URL: http://model_app:5000/predict # URL del servicio de la API del modelo
+    depends_on:
+      - db
+      - model_app
+    networks:
+      - app-network
+    container_name: web
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

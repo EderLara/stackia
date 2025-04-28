@@ -1,0 +1,95 @@
+{% extends 'core/base.html' %}
+{% block titulo %}Predicción de Dígitos MNIST{% endblock %} {# Título específico para esta página #}
+
+{% block contenido %}
+{% load static %}
+    <div class="container mt-4"> {# Contenedor Bootstrap para centrar y añadir padding #}
+
+        <h1 class="mb-4 text-center">Predicción de Dígitos MNIST</h1> {# Título de la página #}
+
+        {# Bloque para mostrar mensajes de Django (Success, Error, Warning, Info) #}
+        {# Adaptado para Alertas de Bootstrap 5.3 #}
+        {% if messages %}
+            <div class="row justify-content-center">
+                <div class="col-md-8"> {# Columna para centrar las alertas #}
+                    {% for message in messages %}
+                        {# message.tags contendrá el nivel del mensaje (success, error, warning, info) #}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <hr> {# Línea separadora después de los mensajes #}
+        {% endif %}
+        {# Fin del bloque de mensajes #}
+
+
+        <div class="row justify-content-center">
+            <div class="col-md-6"> {# Columna para centrar el formulario #}
+                <div class="card p-4 shadow-sm"> {# Tarjeta Bootstrap para agrupar el formulario #}
+                    <h5 class="card-title text-center">Sube una imagen para predecir</h5>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %} {# Token de seguridad de Django #}
+                            <div class="mb-3"> {# Espacio entre campos #}
+                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                {{ field }} {# El widget del campo (input file, etc.) #}
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div> {# Muestra errores #}
+                                {% endfor %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="numero" class="form-label">Número a predecir:</label>
+                                {{ formulario }}
+                            </div>
+                        <button type="submit" class="btn btn-primary w-100">Predecir Dígito</button> {# Botón de submit #}
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        {# Bloque para mostrar los resultados de la predicción #}
+        {% if prediccion is not None %} {# Solo muestra este bloque si la predicción está en el contexto #}
+            <hr class="mt-5"> {# Línea separadora #}
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-8"> {# Columna para los resultados #}
+                    <div class="card p-4 shadow-sm bg-light"> {# Tarjeta con fondo claro para los resultados #}
+                        <h5 class="card-title text-center">Resultado de la Predicción</h5>
+                        <div class="row mt-3">
+                            <div class="col-md-6 text-center">
+                                <p><strong>Dígito Predicho:</strong></p>
+                                <h3 class="text-primary">{{ prediccion }}</h3> {# Muestra el dígito #}
+                            </div>
+                            <div class="col-md-6 text-center">
+                                <p><strong>Confianza:</strong></p>
+                                <h3 class="text-success">{{ confianza|floatformat:4 }}%</h3> {# Muestra la confianza, formateada a 4 decimales #}
+                            </div>
+                        </div>
+                        {% if imagen_url %} {# Muestra la imagen solo si la URL existe #}
+                             <div class="mt-4 text-center">
+                                 <p><strong>Imagen enviada:</strong></p>
+                                 <img src="{{ imagen_url.url }}" alt="Imagen subida" class="img-fluid rounded shadow-sm" style="max-height: 250px;"> {# Imagen responsive con sombra #}
+                             </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        {# Fin del bloque de resultados #}
+
+        {# Puedes añadir el mensaje_url si aún lo necesitas, aunque los messages de Django son más estándar para feedback post-POST #}
+        {% if mensaje_url %}
+             <div class="mt-4 text-center text-info">
+                 <p>{{ mensaje_url }}</p>
+             </div>
+        {% endif %}
+
+
+    </div> {# Cierra el contenedor #}
+
+{% endblock %}
