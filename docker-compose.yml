@@ -35,6 +35,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      SECRET_KEY: M1S3cr3t0M3j0r
       POSTGRES_USER: useria
       POSTGRES_PASSWORD: ia2025
       POSTGRES_DB: dbappia

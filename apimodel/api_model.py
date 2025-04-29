@@ -36,8 +36,7 @@ INVERSION_THRESHOLD = 128
 
 def preprocess_image(image_bytes):
     """
-    Preprocess the image for prediction, including conditional color inversion.
-    Inverts colors ONLY if the background appears light (mean pixel value > INVERSION_THRESHOLD).
+    funcion para preprocesar la imagen, se carga y se valida si hay que invertirle los colores
     """
     try:
         logging.debug("Procesando imagen recibida...")
@@ -75,7 +74,8 @@ def preprocess_image(image_bytes):
         # Asegúrate que tu modelo espera un vector plano de 784 o una imagen 2D/3D
         # Si espera (1, 28, 28, 1) o (1, 28, 28), ajusta el reshape.
         # Este reshape asume que el modelo espera un vector plano (784,).
-        img_array_reshaped = img_array_normalized.reshape(1, 784)
+        # img_array_reshaped = img_array_normalized.reshape(1, 784) -> 
+        img_array_reshaped = img_array_normalized.reshape(1,28,28,1) # 1, la cantida de muestras, 28,28, es la dimension, 1 la cantidad de muestras
         logging.debug(f"Array reformateado a: {img_array_reshaped.shape}")
 
         return img_array_reshaped
