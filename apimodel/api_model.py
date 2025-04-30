@@ -33,6 +33,14 @@ except Exception as e:
 # 128 es el punto medio entre 0 (negro) y 255 (blanco).
 # Puedes ajustar este valor si es necesario basándote en tus imágenes.
 INVERSION_THRESHOLD = 128
+# --- NUEVO: Umbral para binarización ---
+"""
+Píxeles por encima de este valor (en la imagen ya invertida/procesada)
+se considerarán parte del dígito (blanco), los demás fondo (negro).
+Ajustar este valor si es necesario (0 es negro, 255 es blanco).
+Un valor bajo como 50 o 75 suele funcionar bien después de la inversión.
+"""
+BINARIZATION_THRESHOLD = 75     # experimentaremos con este valor
 
 def preprocess_image(image_bytes):
     """
@@ -65,17 +73,24 @@ def preprocess_image(image_bytes):
             img_array_processed = img_array_raw # Usar el array original (no invertido)
             logging.debug("Colores no invertidos.")
 
-        # 5. Normalizar (valores entre 0 y 1)
+        # --- 5. NUEVO: Umbralización/Binarización ---
+        # Convertir a blanco y negro puros para eliminar ruido/líneas
+        # Píxeles >= umbral se vuelven 255 (blanco), < umbral se vuelven 0 (negro)
+        logging.debug(f"Aplicando umbralización con umbral = {BINARIZATION_THRESHOLD}")
+        img_array_binary = np.where(img_array_processed >= BINARIZATION_THRESHOLD, 255, 0).astype(np.uint8)
+        
+
+        # 6. Normalizar (valores entre 0 y 1)
         # img_array_processed ahora contiene la imagen en el formato deseado (fondo negro, dígito blanco)
         img_array_normalized = img_array_processed / 255.0
         logging.debug(f"Imagen convertida a array NumPy y normalizada. Forma: {img_array_normalized.shape}, Rango: [{img_array_normalized.min()}-{img_array_normalized.max()}]")
 
-        # 6. Reformatear para el modelo (1 muestra, 784 características)
+        # 7. Reformatear para el modelo (1 muestra, 784 características)
         # Asegúrate que tu modelo espera un vector plano de 784 o una imagen 2D/3D
         # Si espera (1, 28, 28, 1) o (1, 28, 28), ajusta el reshape.
         # Este reshape asume que el modelo espera un vector plano (784,).
-        # img_array_reshaped = img_array_normalized.reshape(1, 784) -> 
-        img_array_reshaped = img_array_normalized.reshape(1,28,28,1) # 1, la cantida de muestras, 28,28, es la dimension, 1 la cantidad de muestras
+        # img_array_reshaped = img_array_normalized.reshape(1, 784) 
+        img_array_reshaped = img_array_normalized.reshape(1,28,28,1)            # 1, la cantida de muestras, 28,28, es la dimension, 1 la cantidad de muestras
         logging.debug(f"Array reformateado a: {img_array_reshaped.shape}")
 
         return img_array_reshaped
